@@ -2761,7 +2761,7 @@ pub struct Args {
     pub global_args: GlobalArgs,
 }
 
-#[derive(clap::Args, Clone, Debug)]
+#[derive(clap::Args, Clone, Debug, Default)]
 #[command(next_help_heading = "Global Options")]
 pub struct GlobalArgs {
     /// Path to repository to operate on
@@ -2826,7 +2826,7 @@ pub struct GlobalArgs {
     pub early_args: EarlyArgs,
 }
 
-#[derive(clap::Args, Clone, Debug)]
+#[derive(clap::Args, Clone, Debug, Default)]
 pub struct EarlyArgs {
     /// When to colorize output (always, never, debug, auto)
     #[arg(long, value_name = "WHEN", global = true)]
@@ -3271,109 +3271,141 @@ impl CliRunner {
     }
 
     #[instrument(skip_all)]
-    fn run_internal(
-        self,
-        ui: &mut Ui,
-        mut layered_configs: LayeredConfigs,
-    ) -> Result<(), CommandError> {
-        // `cwd` is canonicalized for consistency with `Workspace::workspace_root()` and
-        // to easily compute relative paths between them.
-        let cwd = env::current_dir()
-            .and_then(|cwd| cwd.canonicalize())
-            .map_err(|_| {
-                user_error_with_hint(
-                    "Could not determine current directory",
-                    "Did you update to a commit where the directory doesn't exist?",
-                )
+    fn run_internal(self, mut layered_configs: LayeredConfigs) -> Result<(), CommandError> {
+        dyn_completion_state::UI.with_borrow_mut(|ui| -> Result<(), CommandError> {
+            let ui = ui.as_mut().unwrap();
+
+            // `cwd` is canonicalized for consistency with `Workspace::workspace_root()` and
+            // to easily compute relative paths between them.
+            let cwd = env::current_dir()
+                .and_then(|cwd| cwd.canonicalize())
+                .map_err(|_| {
+                    user_error_with_hint(
+                        "Could not determine current directory",
+                        "Did you update to a commit where the directory doesn't exist?",
+                    )
+                })?;
+            // Use cwd-relative workspace configs to resolve default command and
+            // aliases. WorkspaceLoader::init() won't do any heavy lifting other
+            // than the path resolution.
+            let maybe_cwd_workspace_loader = self
+                .workspace_loader_factory
+                .create(find_workspace_dir(&cwd))
+                .map_err(|err| map_workspace_load_error(err, None));
+            layered_configs.read_user_config()?;
+            let mut repo_config_path = None;
+            if let Ok(loader) = &maybe_cwd_workspace_loader {
+                layered_configs.read_repo_config(loader.repo_path())?;
+                repo_config_path = Some(layered_configs.repo_config_path(loader.repo_path()));
+            }
+            let config = layered_configs.merge();
+            ui.reset(&config).map_err(|e| {
+                let user_config_path = layered_configs.user_config_path().unwrap_or(None);
+                let paths = [repo_config_path, user_config_path]
+                    .into_iter()
+                    .flatten()
+                    .map(|path| format!("- {}", path.display()))
+                    .join("\n");
+                e.hinted(format!("Check the following config files:\n{paths}"))
             })?;
-        // Use cwd-relative workspace configs to resolve default command and
-        // aliases. WorkspaceLoader::init() won't do any heavy lifting other
-        // than the path resolution.
-        let maybe_cwd_workspace_loader = self
-            .workspace_loader_factory
-            .create(find_workspace_dir(&cwd))
-            .map_err(|err| map_workspace_load_error(err, None));
-        layered_configs.read_user_config()?;
-        let mut repo_config_path = None;
-        if let Ok(loader) = &maybe_cwd_workspace_loader {
-            layered_configs.read_repo_config(loader.repo_path())?;
-            repo_config_path = Some(layered_configs.repo_config_path(loader.repo_path()));
-        }
-        let config = layered_configs.merge();
-        ui.reset(&config).map_err(|e| {
-            let user_config_path = layered_configs.user_config_path().unwrap_or(None);
-            let paths = [repo_config_path, user_config_path]
-                .into_iter()
-                .flatten()
-                .map(|path| format!("- {}", path.display()))
-                .join("\n");
-            e.hinted(format!("Check the following config files:\n{paths}"))
+
+            let string_args = expand_args(ui, &self.app, env::args_os(), &config)?;
+
+            // `command_helper_data` is needed by dynamic completion logic which
+            // must occur before arg parsing. So we instantiate it with a few
+            // default values that must be updated later, once arg parsing is
+            // done. This includes `matches`, `global_args`, `settings` and
+            // `maybe_workspace_loader`.
+            let command_helper_data = CommandHelperData {
+                app: self.app,
+                cwd,
+                string_args,
+                matches: Default::default(),
+                global_args: Default::default(),
+                settings: UserSettings::from_config(config),
+                layered_configs,
+                revset_extensions: self.revset_extensions.into(),
+                commit_template_extensions: self.commit_template_extensions,
+                operation_template_extensions: self.operation_template_extensions,
+                maybe_workspace_loader: maybe_cwd_workspace_loader,
+                store_factories: self.store_factories,
+                working_copy_factories: self.working_copy_factories,
+            };
+
+            // Store state needed by dynamic completion code in global variables.
+            // It will be taken back out afterwards.
+            dyn_completion_state::COMMAND_HELPER.replace(Some(CommandHelper {
+                data: Rc::new(command_helper_data),
+            }));
+
+            Ok(())
         })?;
 
-        let string_args = expand_args(ui, &self.app, env::args_os(), &config)?;
-        let (matches, args) = parse_args(
-            ui,
-            &self.app,
-            &self.tracing_subscription,
-            &string_args,
-            &mut layered_configs,
-        )
-        .map_err(|err| map_clap_cli_error(err, ui, &layered_configs))?;
-        for process_global_args_fn in self.process_global_args_fns {
-            process_global_args_fn(ui, &matches)?;
-        }
+        // Run dynamic completion code. This will check the `COMPLETE`
+        // environment variable and exit quickly if it is not set. This must be
+        // run before args are parsed, because the args can be invalid at the
+        // time the shell requests completions.
+        clap_complete::CompleteEnv::with_factory(crate::commands::default_app).complete();
 
-        let maybe_workspace_loader = if let Some(path) = &args.global_args.repository {
-            // Invalid -R path is an error. No need to proceed.
-            let loader = self
-                .workspace_loader_factory
-                .create(&cwd.join(path))
-                .map_err(|err| map_workspace_load_error(err, Some(path)))?;
-            layered_configs.read_repo_config(loader.repo_path())?;
-            Ok(loader)
-        } else {
-            maybe_cwd_workspace_loader
-        };
+        dyn_completion_state::UI.with_borrow_mut(|ui| {
+            let ui = ui.as_mut().unwrap();
 
-        // Apply workspace configs and --config-toml arguments.
-        let config = layered_configs.merge();
-        ui.reset(&config)?;
+            let mut command_helper_data =
+                Rc::into_inner(dyn_completion_state::COMMAND_HELPER.take().unwrap().data).unwrap();
 
-        // If -R is specified, check if the expanded arguments differ. Aliases
-        // can also be injected by --config-toml, but that's obviously wrong.
-        if args.global_args.repository.is_some() {
-            let new_string_args = expand_args(ui, &self.app, env::args_os(), &config).ok();
-            if new_string_args.as_ref() != Some(&string_args) {
-                writeln!(
-                    ui.warning_default(),
-                    "Command aliases cannot be loaded from -R/--repository path"
-                )?;
+            let (matches, args) = parse_args(
+                ui,
+                &command_helper_data.app,
+                &self.tracing_subscription,
+                &command_helper_data.string_args,
+                &mut command_helper_data.layered_configs,
+            )
+            .map_err(|err| map_clap_cli_error(err, ui, &command_helper_data.layered_configs))?;
+            for process_global_args_fn in self.process_global_args_fns {
+                process_global_args_fn(ui, &matches)?;
             }
-        }
 
-        let settings = UserSettings::from_config(config);
-        let command_helper_data = CommandHelperData {
-            app: self.app,
-            cwd,
-            string_args,
-            matches,
-            global_args: args.global_args,
-            settings,
-            layered_configs,
-            revset_extensions: self.revset_extensions.into(),
-            commit_template_extensions: self.commit_template_extensions,
-            operation_template_extensions: self.operation_template_extensions,
-            maybe_workspace_loader,
-            store_factories: self.store_factories,
-            working_copy_factories: self.working_copy_factories,
-        };
-        let command_helper = CommandHelper {
-            data: Rc::new(command_helper_data),
-        };
-        for start_hook_fn in self.start_hook_fns {
-            start_hook_fn(ui, &command_helper)?;
-        }
-        (self.dispatch_fn)(ui, &command_helper)
+            if let Some(path) = &args.global_args.repository {
+                // Invalid -R path is an error. No need to proceed.
+                let loader = self
+                    .workspace_loader_factory
+                    .create(&command_helper_data.cwd.join(path))
+                    .map_err(|err| map_workspace_load_error(err, Some(path)))?;
+                command_helper_data
+                    .layered_configs
+                    .read_repo_config(loader.repo_path())?;
+                command_helper_data.maybe_workspace_loader = Ok(loader);
+            };
+
+            // Apply workspace configs and --config-toml arguments.
+            let config = command_helper_data.layered_configs.merge();
+            ui.reset(&config)?;
+
+            // If -R is specified, check if the expanded arguments differ. Aliases
+            // can also be injected by --config-toml, but that's obviously wrong.
+            if args.global_args.repository.is_some() {
+                let new_string_args =
+                    expand_args(ui, &command_helper_data.app, env::args_os(), &config).ok();
+                if new_string_args.as_ref() != Some(&command_helper_data.string_args) {
+                    writeln!(
+                        ui.warning_default(),
+                        "Command aliases cannot be loaded from -R/--repository path"
+                    )?;
+                }
+            }
+
+            command_helper_data.matches = matches;
+            command_helper_data.global_args = args.global_args;
+            command_helper_data.settings = UserSettings::from_config(config);
+
+            let command_helper = CommandHelper {
+                data: Rc::new(command_helper_data),
+            };
+            for start_hook_fn in self.start_hook_fns {
+                start_hook_fn(ui, &command_helper)?;
+            }
+            (self.dispatch_fn)(ui, &command_helper)
+        })
     }
 
     #[must_use]
@@ -3387,12 +3419,38 @@ impl CliRunner {
             .build()
             .unwrap();
         let layered_configs = LayeredConfigs::from_environment(config);
-        let mut ui = Ui::with_config(&layered_configs.merge())
+        let ui = Ui::with_config(&layered_configs.merge())
             .expect("default config should be valid, env vars are stringly typed");
-        let result = self.run_internal(&mut ui, layered_configs);
+
+        // Put `ui` in static variable so it can be access by dynamic completion
+        // logic. This will be triggered in `run_internal`. We can take the `ui`
+        // back out of the static after that.
+        dyn_completion_state::UI.set(Some(ui));
+        let result = self.run_internal(layered_configs);
+        let mut ui = dyn_completion_state::UI.take().unwrap();
+
         let exit_code = handle_command_result(&mut ui, result);
         ui.finalize_pager();
         exit_code
+    }
+}
+
+/// This state needs to be accessible for dynamic completion code, which doesn't
+/// accept arguments. We also can't extract the initialization of this into a
+/// separate function (that could be called by dynamic completion code), because
+/// the initialization can depend on user-provided code, most notably Google's
+/// custom storage backend. Global mutable state seems like the only option
+/// left.
+pub mod dyn_completion_state {
+    use std::cell::RefCell;
+
+    use super::CommandHelper;
+    use super::Ui;
+
+    // At least command_helper must be thread_local, Ui may not be necessary.
+    thread_local! {
+        pub static UI: RefCell<Option<Ui>> = const { RefCell::new(None) };
+        pub static COMMAND_HELPER: RefCell<Option<CommandHelper>> = const { RefCell::new(None) };
     }
 }
 

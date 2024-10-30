@@ -113,6 +113,7 @@
             $out/bin/jj util mangen > ./jj.1
             installManPage ./jj.1
 
+            # TODO: install dynamic completions differently ?
             installShellCompletion --cmd jj \
               --bash <($out/bin/jj util completion bash) \
               --fish <($out/bin/jj util completion fish) \

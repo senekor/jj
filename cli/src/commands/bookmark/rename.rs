@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use clap_complete::ArgValueCompleter;
 use jj_lib::op_store::RefTarget;
 
 use super::has_tracked_remote_bookmarks;
@@ -20,12 +21,15 @@ use crate::command_error::user_error;
 use crate::command_error::CommandError;
 use crate::ui::Ui;
 
+mod complete;
+
 /// Rename `old` bookmark name to `new` bookmark name
 ///
 /// The new bookmark name points at the same commit as the old bookmark name.
 #[derive(clap::Args, Clone, Debug)]
 pub struct BookmarkRenameArgs {
     /// The old name of the bookmark
+    #[arg(add = ArgValueCompleter::new(complete::branch))]
     old: String,
 
     /// The new name of the bookmark

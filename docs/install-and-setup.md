@@ -206,6 +206,25 @@ $ jj config set --user user.email "martinvonz@google.com"
 
 ## Command-line completion
 
+TODO: update this section if appropriate.
+
+I think we can simply update the output of `jj util completion $SHELL` to be
+- `source <(COMPLETE=bash jj)`'
+- `COMPLETE=fish jj | source`
+etc. instead of the actual script.
+That will honor the recommendation of clap to regenerate and source the hooks on
+every startup of the shell.
+(see the recommendation here: https://docs.rs/clap_complete/latest/clap_complete/env/index.html)
+
+Nushell is not yet supported for dynamic completions, I presume we can simply
+continue to emit the normal, static completions for Nushell.
+
+Another option would be to have some kind of beta-phase for the dynamic
+completions, where we tell users to manually add `COMPLETE=fish jj | source`
+to their shell init files if they want to opt into the beta. If there are no
+issues found, we change `jj util completion` to emit the dynamic completion
+hooks instead.
+
 To set up command-line completion, source the output of
 `jj util completion bash/zsh/fish`. Exactly how to source it
 depends on your shell.
