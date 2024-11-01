@@ -30,7 +30,7 @@ be compiled from the same source code.
 
 #### From Source
 
-First make sure that you have a Rust version >= 1.76 and that the `libssl-dev`,
+First make sure that you have a Rust version >= 1.80 and that the `libssl-dev`,
 `openssl`, `pkg-config`, and `build-essential` packages are installed by running
 something like this:
 
@@ -110,7 +110,7 @@ emerge -av dev-vcs/jj
 
 #### From Source, Vendored OpenSSL
 
-First make sure that you have a Rust version >= 1.76. You may also need to run:
+First make sure that you have a Rust version >= 1.80. You may also need to run:
 
 ```shell
 xcode-select --install
@@ -133,7 +133,7 @@ cargo install --features vendored-openssl --locked --bin jj jj-cli
 
 #### From Source, Homebrew OpenSSL
 
-First make sure that you have a Rust version >= 1.76. You will also need
+First make sure that you have a Rust version >= 1.80. You will also need
 [Homebrew](https://brew.sh/) installed. You may then need to run some or all of
 these:
 
@@ -180,7 +180,7 @@ sudo port install jujutsu
 
 ### Windows
 
-First make sure that you have a Rust version >= 1.76. Now run either:
+First make sure that you have a Rust version >= 1.80. Now run either:
 
 ```shell
 # To install the *prerelease* version from the main branch

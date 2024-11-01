@@ -725,7 +725,7 @@ fn binary_search_pos_by(size: u32, mut f: impl FnMut(u32) -> Ordering) -> Positi
         let mid = (low + high) / 2;
         let cmp = f(mid);
         // According to Rust std lib, this produces cmov instructions.
-        // https://github.com/rust-lang/rust/blob/1.76.0/library/core/src/slice/mod.rs#L2845-L2855
+        // https://github.com/rust-lang/rust/blob/1.80.0/library/core/src/slice/mod.rs#L2811-L2821
         low = if cmp == Ordering::Less { mid + 1 } else { low };
         high = if cmp == Ordering::Greater { mid } else { high };
         if cmp == Ordering::Equal {

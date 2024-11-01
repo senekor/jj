@@ -30,6 +30,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Default operation log template now shows end times of operations instead of
   start times.
 
+* The minimum supported Rust version (MSRV) is now 1.80.0.
+
 ### Deprecations
 
 * `git.auto-local-bookmark` replaces `git.auto-local-branch`. The latter remains

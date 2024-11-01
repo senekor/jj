@@ -14,7 +14,6 @@
 
 //! Domain-specific language helpers.
 
-use std::array;
 use std::collections::HashMap;
 use std::fmt;
 use std::slice;
@@ -206,8 +205,7 @@ impl<'i, T> FunctionCallNode<'i, T> {
     > {
         if self.keyword_args.is_empty() {
             let (required, optional) = self.expect_arguments::<N, M>()?;
-            // TODO: use .each_ref() if MSRV is bumped to 1.77.0
-            Ok((array::from_fn(|i| &required[i]), optional))
+            Ok((required.each_ref(), optional))
         } else {
             let (required, optional) = self.expect_named_arguments_vec(names, N, N + M)?;
             Ok((
