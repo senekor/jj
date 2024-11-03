@@ -3053,6 +3053,36 @@ fn handle_early_args(
     Ok(())
 }
 
+fn handle_shell_completion(
+    ui: &mut Ui,
+    app: &Command,
+    config: &config::Config,
+    cwd: &Path,
+) -> Result<(), CommandError> {
+    let mut string_args = vec![];
+    // Take the first two arguments as is, they must be passed to clap_complete
+    // without any changes. They are usually "jj --".
+    for arg_os in env::args_os().take(2) {
+        if let Some(string_arg) = arg_os.to_str() {
+            string_args.push(string_arg.to_owned());
+        } else {
+            return Err(cli_error("Non-utf8 argument"));
+        }
+    }
+    if env::args_os().nth(2).is_some() {
+        // Make sure aliases are expanded before passing them to
+        // clap_complete. We skip the first two args ("jj" and "--") for
+        // alias resolution, then we stitch the args back together, like
+        // clap_complete expects them.
+        let resolved_aliases = expand_args(ui, app, env::args_os().skip(2), config)?;
+        string_args.extend(resolved_aliases);
+    }
+    clap_complete::CompleteEnv::with_factory(|| app.clone())
+        .try_complete(string_args.iter(), Some(cwd))
+        .map(|_| ())
+        .map_err(internal_error)
+}
+
 pub fn expand_args(
     ui: &Ui,
     app: &Command,
@@ -3309,6 +3339,10 @@ impl CliRunner {
             e.hinted(format!("Check the following config files:\n{paths}"))
         })?;
 
+        if env::var_os("COMPLETE").is_some() {
+            return handle_shell_completion(ui, &self.app, &config, &cwd);
+        }
+
         let string_args = expand_args(ui, &self.app, env::args_os(), &config)?;
         let (matches, args) = parse_args(
             ui,
@@ -3378,16 +3412,6 @@ impl CliRunner {
     #[must_use]
     #[instrument(skip(self))]
     pub fn run(mut self) -> ExitCode {
-        match clap_complete::CompleteEnv::with_factory(|| self.app.clone())
-            .try_complete(env::args_os(), None)
-        {
-            Ok(true) => return ExitCode::SUCCESS,
-            Err(e) => {
-                eprintln!("failed to generate completions: {e}");
-                return ExitCode::FAILURE;
-            }
-            Ok(false) => {}
-        };
         let builder = config::Config::builder().add_source(crate::config::default_config());
         let config = self
             .extra_configs
