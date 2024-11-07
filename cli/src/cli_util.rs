@@ -3077,7 +3077,7 @@ fn handle_shell_completion(
         let resolved_aliases = expand_args(ui, app, env::args_os().skip(2), config)?;
         string_args.extend(resolved_aliases);
     }
-    clap_complete::CompleteEnv::with_factory(|| app.clone())
+    clap_complete::CompleteEnv::with_factory(|| app.clone().allow_external_subcommands(true))
         .try_complete(string_args.iter(), Some(cwd))
         .map(|_| ())
         .map_err(internal_error)

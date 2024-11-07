@@ -115,3 +115,8 @@ fn test_completions_are_generated() {
     let stdout = test_env.jj_cmd_success(test_env.env_root(), &["--"]);
     assert!(stdout.starts_with("complete --keep-order --exclusive --command jj --arguments"));
 }
+
+// TODO: test completion of aliases
+//   - user
+//   - repo
+//   - recursive? bcs jj resolves aliases recursively

@@ -14,6 +14,7 @@
 
 use clap::FromArgMatches as _;
 use clap_complete::CompletionCandidate;
+use config::Config;
 use jj_lib::workspace::DefaultWorkspaceLoaderFactory;
 use jj_lib::workspace::WorkspaceLoaderFactory as _;
 
@@ -28,7 +29,7 @@ use crate::config::LayeredConfigs;
 use crate::ui::Ui;
 
 pub fn local_bookmarks() -> Vec<CompletionCandidate> {
-    with_jj(|mut jj| {
+    with_jj(|mut jj, _| {
         jj.arg("bookmark")
             .arg("list")
             .arg("--template")
@@ -41,15 +42,30 @@ pub fn local_bookmarks() -> Vec<CompletionCandidate> {
     })
 }
 
+pub fn aliases() -> Vec<CompletionCandidate> {
+    with_jj(|_, config| {
+        Ok(config
+            .get_table("aliases")?
+            .into_keys()
+            // This is opinionated, but many people probably have several
+            // single- or two-letter aliases they use all the time. These
+            // aliases don't need to be completed and they would only clutter
+            // the output of `jj <TAB>`.
+            .filter(|alias| alias.len() > 2)
+            .map(CompletionCandidate::new)
+            .collect())
+    })
+}
+
 /// Shell out to jj during dynamic completion generation
 ///
 /// In case of errors, print them and early return an empty vector.
 fn with_jj<F>(completion_fn: F) -> Vec<CompletionCandidate>
 where
-    F: FnOnce(std::process::Command) -> Result<Vec<CompletionCandidate>, CommandError>,
+    F: FnOnce(std::process::Command, Config) -> Result<Vec<CompletionCandidate>, CommandError>,
 {
     get_jj_command()
-        .and_then(completion_fn)
+        .and_then(|(jj, config)| completion_fn(jj, config))
         .unwrap_or_else(|e| {
             eprintln!("{}", e.error);
             Vec::new()
@@ -65,7 +81,7 @@ where
 /// give completion code access to custom backends. Shelling out was chosen as
 /// the preferred method, because it's more maintainable and the performance
 /// requirements of completions aren't very high.
-fn get_jj_command() -> Result<std::process::Command, CommandError> {
+fn get_jj_command() -> Result<(std::process::Command, Config), CommandError> {
     let current_exe = std::env::current_exe().map_err(user_error)?;
     let mut command = std::process::Command::new(current_exe);
 
@@ -102,10 +118,19 @@ fn get_jj_command() -> Result<std::process::Command, CommandError> {
         .disable_version_flag(true)
         .disable_help_flag(true)
         .ignore_errors(true)
+        // Here, allow_external_subcommands fixes a weird issue. Without it,
+        // parsing GlobalArgs will fail with the message that a required arg
+        // is missing, where the required arg is a boolean flag. This seems
+        // unexpected, because missing boolean flags are usually treated as
+        // false. It is also not clear to me why allow_external_subcommands
+        // changes this behavior. See the discussion in the clap repo:
+        // https://github.com/clap-rs/clap/discussions/5812
+        .allow_external_subcommands(true)
         .try_get_matches_from(args)?;
     let args: GlobalArgs = GlobalArgs::from_arg_matches(&args)?;
 
     if let Some(repository) = args.repository {
+        // TODO: load repo config here so repo aliases are also completed
         command.arg("--repository");
         command.arg(repository);
     }
@@ -118,5 +143,5 @@ fn get_jj_command() -> Result<std::process::Command, CommandError> {
         command.arg(config_toml);
     }
 
-    Ok(command)
+    Ok((command, config))
 }
