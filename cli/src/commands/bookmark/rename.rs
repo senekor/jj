@@ -32,6 +32,7 @@ pub struct BookmarkRenameArgs {
     old: String,
 
     /// The new name of the bookmark
+    #[arg(add = ArgValueCandidates::new(complete::push_bookmark_prefix))]
     new: String,
 }
 

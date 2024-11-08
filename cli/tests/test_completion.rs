@@ -76,3 +76,30 @@ fn test_global_arg_repository_is_respected() {
     );
     insta::assert_snapshot!(stdout, @"aaa");
 }
+
+#[test]
+fn test_push_bookmark_prefix() {
+    let mut test_env = TestEnvironment::default();
+
+    test_env.add_config(r#"git.push-bookmark-prefix = "fancy-prefix/""#);
+
+    test_env.add_env_var("COMPLETE", "fish");
+
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &["--", "jj", "bookmark", "create", "f"],
+    );
+    insta::assert_snapshot!(stdout, @"fancy-prefix/");
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &[
+            "--",
+            "jj",
+            "bookmark",
+            "rename",
+            "hypothetical-old-name",
+            "f",
+        ],
+    );
+    insta::assert_snapshot!(stdout, @"fancy-prefix/");
+}

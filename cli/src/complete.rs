@@ -41,6 +41,26 @@ pub fn local_bookmarks() -> Vec<CompletionCandidate> {
     })
 }
 
+pub fn push_bookmark_prefix() -> Vec<CompletionCandidate> {
+    with_jj(|mut jj| {
+        let output = jj
+            .arg("config")
+            .arg("get")
+            .arg("git.push-bookmark-prefix")
+            .output()
+            .map_err(user_error)?;
+
+        if output.status.success() {
+            String::from_utf8(output.stdout)
+                .map(|s| vec![CompletionCandidate::new(s.trim())])
+                .map_err(internal_error)
+        } else {
+            // user probably didn't configure a bookmark prefix
+            Ok(Vec::new())
+        }
+    })
+}
+
 /// Shell out to jj during dynamic completion generation
 ///
 /// In case of errors, print them and early return an empty vector.
