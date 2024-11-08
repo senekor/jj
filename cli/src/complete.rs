@@ -41,6 +41,35 @@ pub fn local_bookmarks() -> Vec<CompletionCandidate> {
     })
 }
 
+pub fn new_remote() -> Vec<CompletionCandidate> {
+    with_jj(|mut jj| {
+        let stdout = jj
+            .arg("git")
+            .arg("remote")
+            .arg("list")
+            .output()
+            .map(|output| output.stdout)
+            .ok()
+            .and_then(|stdout| String::from_utf8(stdout).ok())
+            .unwrap_or_default();
+
+        let existing_remotes: Vec<_> = stdout
+            .lines()
+            .map(|line| {
+                line.split_once(' ')
+                    .map(|(name, _url)| name)
+                    .unwrap_or(line)
+            })
+            .collect();
+
+        ["origin", "upstream"]
+            .into_iter()
+            .filter(|candidate| !existing_remotes.contains(candidate))
+            .map(CompletionCandidate::new)
+            .collect()
+    })
+}
+
 /// Shell out to jj during dynamic completion generation
 ///
 /// In case of errors, print them and early return an empty vector.

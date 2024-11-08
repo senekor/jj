@@ -76,3 +76,23 @@ fn test_global_arg_repository_is_respected() {
     );
     insta::assert_snapshot!(stdout, @"aaa");
 }
+
+#[test]
+fn test_new_remote() {
+    let mut test_env = TestEnvironment::default();
+    test_env.jj_cmd_ok(test_env.env_root(), &["git", "init"]);
+
+    // add a remote to make sure existing remotes are not suggested
+    test_env.jj_cmd_ok(
+        test_env.env_root(),
+        &["git", "remote", "add", "origin", "git@git.local:user/repo"],
+    );
+
+    test_env.add_env_var("COMPLETE", "fish");
+
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &["--", "jj", "git", "remote", "add", "u"],
+    );
+    insta::assert_snapshot!(stdout, @"upstream");
+}
