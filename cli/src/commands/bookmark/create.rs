@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use clap::builder::NonEmptyStringValueParser;
+use clap_complete::ArgValueCandidates;
 use jj_lib::object_id::ObjectId as _;
 use jj_lib::op_store::RefTarget;
 
@@ -21,6 +22,7 @@ use crate::cli_util::CommandHelper;
 use crate::cli_util::RevisionArg;
 use crate::command_error::user_error_with_hint;
 use crate::command_error::CommandError;
+use crate::complete;
 use crate::ui::Ui;
 
 /// Create a new bookmark
@@ -35,6 +37,7 @@ pub struct BookmarkCreateArgs {
 
     /// The bookmarks to create
     #[arg(required = true, value_parser = NonEmptyStringValueParser::new())]
+    #[arg(add = ArgValueCandidates::new(complete::push_bookmark_prefix))]
     names: Vec<String>,
 }
 

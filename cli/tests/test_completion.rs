@@ -115,3 +115,50 @@ fn test_completions_are_generated() {
     let stdout = test_env.jj_cmd_success(test_env.env_root(), &["--"]);
     assert!(stdout.starts_with("complete --keep-order --exclusive --command jj --arguments"));
 }
+
+#[test]
+fn test_push_bookmark_prefix() {
+    let mut test_env = TestEnvironment::default();
+
+    test_env.add_config(r#"git.push-bookmark-prefix = "fancy-prefix/""#);
+
+    test_env.add_env_var("COMPLETE", "fish");
+
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &["--", "jj", "bookmark", "create", "f"],
+    );
+    insta::assert_snapshot!(stdout, @"fancy-prefix/");
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &[
+            "--",
+            "jj",
+            "bookmark",
+            "rename",
+            "hypothetical-old-name",
+            "f",
+        ],
+    );
+    insta::assert_snapshot!(stdout, @"fancy-prefix/");
+}
+
+#[test]
+fn test_new_remote() {
+    let mut test_env = TestEnvironment::default();
+    test_env.jj_cmd_ok(test_env.env_root(), &["git", "init"]);
+
+    // add a remote to make sure existing remotes are not suggested
+    test_env.jj_cmd_ok(
+        test_env.env_root(),
+        &["git", "remote", "add", "origin", "git@git.local:user/repo"],
+    );
+
+    test_env.add_env_var("COMPLETE", "fish");
+
+    let stdout = test_env.jj_cmd_success(
+        test_env.env_root(),
+        &["--", "jj", "git", "remote", "add", "u"],
+    );
+    insta::assert_snapshot!(stdout, @"upstream");
+}
