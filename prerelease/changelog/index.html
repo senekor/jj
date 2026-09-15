@@ -7734,13 +7734,21 @@ to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 </ul>
 <h3 id="fixed-bugs">Fixed bugs<a class="headerlink" href="#fixed-bugs" title="Permanent link">&para;</a></h3>
 <ul>
-<li>On Windows, <code>jj</code> no longer hangs when a subprocess needs to prompt the user,
+<li>
+<p>On Windows, <code>jj</code> no longer hangs when a subprocess needs to prompt the user,
   such as <code>ssh</code> asking for a key passphrase or for confirmation of an unknown
   host key. Subprocesses started from a terminal now inherit its console, rather
   than being given an invisible one by <code>CREATE_NO_WINDOW</code> for the prompt to
   disappear into.
   <a href="https://github.com/jj-vcs/jj/issues/6745">#6745</a>
-  <a href="https://github.com/jj-vcs/jj/issues/8547">#8547</a></li>
+  <a href="https://github.com/jj-vcs/jj/issues/8547">#8547</a></p>
+</li>
+<li>
+<p>On Windows, <code>jj git colocation enable</code> and <code>jj git colocation disable</code> no
+  longer fail with "Access is denied (os error 5)" when the Git repository
+  contains pack files.
+  <a href="https://github.com/jj-vcs/jj/issues/8661">#8661</a></p>
+</li>
 </ul>
 <h2 id="0451-2026-09-03"><a href="https://github.com/jj-vcs/jj/compare/v0.45.0...v0.45.1">0.45.1</a> - 2026-09-03<a class="headerlink" href="#0451-2026-09-03" title="Permanent link">&para;</a></h2>
 <p>This release fixes an error that prevented the new jj-core crate from being
