@@ -7705,6 +7705,10 @@ to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
   worktree when one exists.</p>
 </li>
 <li>
+<p><code>jj workspace remove</code> removes a workspace and its directory from disk. The
+  working-copy state is snapshotted into a commit before removal.</p>
+</li>
+<li>
 <p><code>jj git colocation status</code>/<code>enable</code>/<code>disable</code> now work on child
   workspaces. <code>status</code> correctly reports colocation state and includes
   the workspace name. <code>enable</code> creates a Git worktree and <code>disable</code>
@@ -7748,6 +7752,12 @@ to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
   longer fail with "Access is denied (os error 5)" when the Git repository
   contains pack files.
   <a href="https://github.com/jj-vcs/jj/issues/8661">#8661</a></p>
+</li>
+<li>
+<p><code>jj undo</code> of <code>jj workspace forget</code> now correctly preserves the workspace's
+  recorded path. Previously the path metadata was lost, leaving the workspace
+  in a broken state after undo.
+  <a href="https://github.com/jj-vcs/jj/issues/9991">#9991</a></p>
 </li>
 </ul>
 <h2 id="0451-2026-09-03"><a href="https://github.com/jj-vcs/jj/compare/v0.45.0...v0.45.1">0.45.1</a> - 2026-09-03<a class="headerlink" href="#0451-2026-09-03" title="Permanent link">&para;</a></h2>
