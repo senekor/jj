@@ -7684,6 +7684,12 @@ to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <li>
 <p>The minimum supported Rust version (MSRV) is now 1.97.1.</p>
 </li>
+<li>
+<p><code>jj bisect run</code> now runs some consistency checks before proceeding to bisect.
+  This helps ensure that the command can tell good and bad revisions apart,
+  and that the working copy does go from bad to good over the provided revset.
+  Use the new flag <code>--trust-endpoints</code> to disable these checks.</p>
+</li>
 </ul>
 <h3 id="deprecations">Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">&para;</a></h3>
 <h3 id="new-features">New features<a class="headerlink" href="#new-features" title="Permanent link">&para;</a></h3>

@@ -8776,6 +8776,7 @@ revision as "good").</p>
 <li>
 <p><code>&lt;COMMAND&gt;</code> — Command to run to determine the status of a revision</p>
 <p>Each revision being checked will be directly edited (will become the current working copy) before running this command. The exit status of the command will be used to mark revisions as "good" or "bad": status 0 means "good", 125 means to skip the revision, 127 (command not found) will abort the bisection, and any other non-zero exit status means the revision is "bad".</p>
+<p>In order for bisection to be meaningful, <code>COMMAND</code> must succeed for every revision in <code>heads(REVSETS)</code>, and it must fail for every revision in <code>parents(connected(REVSETS)) ~ connected(REVSETS)</code>; if you are using <code>--find-good</code>, these checks are reversed. (Visit <a href="https://docs.jj-vcs.dev/latest/revsets/">https://docs.jj-vcs.dev/latest/revsets/</a> for more information about the jj revset language.)</p>
 <p>The target's commit ID is available to the command in the <code>$JJ_BISECT_TARGET</code> environment variable.</p>
 </li>
 <li>
@@ -8795,6 +8796,10 @@ revision as "good").</p>
 <p>Normally, <code>jj bisect run</code> looks for a revision in the provided <code>REVSETS</code> that's bad and whose parents are good. With <code>--find-good</code>, <code>jj bisect run</code> instead finds a commit that's good and whose parents are bad.</p>
 <p><code>COMMAND</code> is still expected to exit with code 0 if and only if the revision is good.</p>
 <p>Default value: <code>false</code></p>
+</li>
+<li>
+<p><code>--trust-endpoints</code> — Skip the pre-bisection checks</p>
+<p>By default, <code>COMMAND</code> will be run on every revision <code>jj bisect run</code> assumes to be good or bad before bisection actually begins, as detailed under the documentation for <code>COMMAND</code>. This flag disables these checks.</p>
 </li>
 </ul>
 <h2 id="jj-bookmark"><code>jj bookmark</code><a class="headerlink" href="#jj-bookmark" title="Permanent link">&para;</a></h2>
