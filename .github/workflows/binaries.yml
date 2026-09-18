@@ -3,7 +3,7 @@ name: binaries
 on:
   push:
     branches:
-      - main
+      - not-an-actual-branch-lol # TODO: revert. I don't need this running on my fork.
 
 permissions: {}
 
