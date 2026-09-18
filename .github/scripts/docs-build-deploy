@@ -8,15 +8,64 @@
 # creates a commit directly on the `gh-pages` branch.
 set -ev
 
-# Affects the generation of `sitemap.xml.gz` by `mkdocs`. See
-# https://github.com/jimporter/mike/issues/103 and
-# https://reproducible-builds.org/docs/source-date-epoch/
-export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct docs/ mkdocs.yml)
-# TODO: `--alias-type symlink` is the
-# default, and may be nicer in some ways. However,
-# this requires deploying to GH Pages via a "custom GitHub Action", as in
-# https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow.
-# Otherwise, you get an error:
-# > Site contained a symlink that should be dereferenced: /main.
-# > For more information, see https://docs.github.com/github/working-with-github-pages/troubleshooting-jekyll-build-errors-for-github-pages-sites#config-file-error.
-uv run -- mike deploy --alias-type copy "$@"
+version="${1:?missing version argument}"
+commit_hash="$(git rev-parse @ | cut -c -12)"
+repo_root="$(git rev-parse --show-toplevel)"
+
+build_site() {
+    site="${1:?missing site argument}"
+
+    cd "$repo_root/web/docs"
+    # TODO: remove jj/ prefix before merge
+    npm run build -- --base "/jj/$site/"
+    cd "$repo_root"
+
+    # move to $site-staging to avoid conflict with existing site
+    # (e.g. "prerelease" or "latest") when checking out gh-pages
+    mv web/docs/dist "$site-staging"
+}
+
+git_add_site() {
+    site="${1:?missing site argument}"
+
+    rm -rf "$site"
+    mv "$site-staging" "$site"
+    git add "$site"
+}
+
+if test "$version" = "prerelease" ; then
+    build_site "$version"
+
+    git checkout gh-pages
+    git_add_site "$version"
+
+    commit_msg="Deploy prerelease docs for $commit_hash"
+else
+    build_site "$version"
+    # Build the "latest" alias from scratch. Copying over the site of the
+    # explicit version doesn't work, because links from the "latest" site would
+    # point to the explicit version site.
+    build_site "latest"
+
+    git checkout gh-pages
+    git_add_site "$version"
+    git_add_site "latest"
+
+    # update data for version selector:
+    # - remove "latest" alias from previous version
+    # - add new version with "latest" alias
+    cat versions.json \
+        | jq 'map(.aliases |= map(select(. != "latest")))' versions.json \
+        | jq --arg version "$version" '. = (.[:1] + [{
+            "version": $version,
+            "title": $version,
+            "aliases": ["latest"]
+        }] + .[1:])' > versions-staging.json
+    mv versions-staging.json versions.json
+    git add versions.json
+
+    commit_msg="Deploy docs for $version"
+fi
+
+git commit -m "$commit_msg" || echo "No changes to commit"
+git push origin gh-pages
