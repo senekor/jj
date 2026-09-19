@@ -4,6 +4,10 @@ title: Frequently asked questions
 
 ### Why does my bookmark not move to the new commit after `jj new/commit`?
 
+This line is visible in release test-2.
+
+This line is only visible in the pre-release documentation.
+
 If you're familiar with Git, you might expect the current bookmark to move forward
 when you commit. However, Jujutsu does not have a concept of a "current bookmark".
 
