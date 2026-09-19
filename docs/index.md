@@ -8,6 +8,10 @@ title: Jujutsu—a version control system
 
 ## Welcome to `jj`'s documentation website!
 
+_TEST TEST TEST_
+
+**This version of the docs was released after moving the starlight version into `docs/`.**
+
 <!-- This only applies to the website, not to the GitHub interface -->
 The complete list of the available documentation pages is located in
 the sidebar on the left of the page. The sidebar may be hidden; if so,
