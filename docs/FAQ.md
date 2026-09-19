@@ -1,5 +1,7 @@
 # Frequently asked questions
 
+foobar
+
 ### Why does my bookmark not move to the new commit after `jj new/commit`?
 
 If you're familiar with Git, you might expect the current bookmark to move forward
