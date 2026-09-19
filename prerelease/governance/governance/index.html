@@ -97,9 +97,12 @@
         // Add change handler
         select.addEventListener('change', (e) => {
           const selectedVersion = e.target.value;
-          const currentPath = window.location.pathname;
+          // Strip site base from currentPath. This is a no-op if the site ase
+          // is just "/", but necessary for the version switcher to work if
+          // someone is testing the site on a fork with a regular github pages
+          // URL, where the site base is "/jj/".
+          const currentPath = window.location.pathname.slice(siteBase.length - 1);
           alert(currentPath);
-          // const currentPathWithoutSiteBase = currentPath.replace
           const versionRegex = /^\/[^\/]+/;
           const pagePath = currentPath.replace(versionRegex, '').replace(/^\//, '');
           window.location.href = `${siteBase}${selectedVersion}/${pagePath}`;
@@ -206,9 +209,12 @@
         // Add change handler
         select.addEventListener('change', (e) => {
           const selectedVersion = e.target.value;
-          const currentPath = window.location.pathname;
+          // Strip site base from currentPath. This is a no-op if the site ase
+          // is just "/", but necessary for the version switcher to work if
+          // someone is testing the site on a fork with a regular github pages
+          // URL, where the site base is "/jj/".
+          const currentPath = window.location.pathname.slice(siteBase.length - 1);
           alert(currentPath);
-          // const currentPathWithoutSiteBase = currentPath.replace
           const versionRegex = /^\/[^\/]+/;
           const pagePath = currentPath.replace(versionRegex, '').replace(/^\//, '');
           window.location.href = `${siteBase}${selectedVersion}/${pagePath}`;
