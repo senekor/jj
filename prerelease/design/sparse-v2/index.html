@@ -58,7 +58,7 @@
         if (!versions || versions.length === 0) return;
 
         // Determine current version from URL path
-        const pathMatch = window.location.pathname.match(/^\/([^\/]+)/);
+        const pathMatch = window.location.pathname.slice(siteBase.length - 1).match(/^\/([^\/]+)/);
         let currentVersion = 'unknown';
 
         if (pathMatch) {
@@ -165,7 +165,7 @@
         if (!versions || versions.length === 0) return;
 
         // Determine current version from URL path
-        const pathMatch = window.location.pathname.match(/^\/([^\/]+)/);
+        const pathMatch = window.location.pathname.slice(siteBase.length - 1).match(/^\/([^\/]+)/);
         let currentVersion = 'unknown';
 
         if (pathMatch) {
