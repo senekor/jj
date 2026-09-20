@@ -16,7 +16,7 @@ build_site() {
     site="${1:?missing site argument}"
 
     cd "$repo_root/web/docs"
-    npm run build -- --base "/$site/"
+    npm run build -- --base "/jj/$site/"
     cd "$repo_root"
 
     # move to $site-staging to avoid conflict with existing site
