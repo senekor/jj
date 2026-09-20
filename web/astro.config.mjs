@@ -13,7 +13,7 @@ const docsDir = fileURLToPath(new URL('src/content/docs', import.meta.url));
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://docs.jj-vcs.dev',
+	site: 'https://senekor.github.io',
 	markdown: {
 		remarkPlugins: [
 			remarkGfm,
