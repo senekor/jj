@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   prerelease-docs-build-deploy:
-    if: github.repository_owner == 'jj-vcs' # Stops this job from running on forks
+    # if: github.repository_owner == 'jj-vcs' # Stops this job from running on forks
     # IMPORTANT: this workflow also functions as a test for `docs-deploy-website-latest-release` in
     # releases.yml. Any fixes here should probably be duplicated there.
     runs-on: ubuntu-24.04
