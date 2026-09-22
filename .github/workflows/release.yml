@@ -98,21 +98,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          python-version: 3.11
-      - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
-        with:
-          version: "0.5.1"
-          enable-cache: false
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install dependencies
+        working-directory: web/docs
+        run: npm ci
       - name: Compile docs and zip them up
+        working-directory: web/docs
         run: |
-          # TODO: test this
-          cd web/docs
           npm run build
           archive="jj-${RELEASE_TAG_NAME}-docs-html.tar.gz"
           tar czf "$archive" -C "dist" .
+          mv "$archive" ../..
           echo "ASSET=$archive" >> $GITHUB_ENV
         env:
           MKDOCS_OFFLINE: true
