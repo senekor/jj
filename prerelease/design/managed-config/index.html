@@ -1,0 +1,535 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Repo-managed JJ configuration | Jujutsu docs</title><link rel="canonical" href="https://senekor.github.io/jj/prerelease/design/managed-config/"/><link rel="sitemap" href="/jj/prerelease/sitemap-index.xml"/><link rel="shortcut icon" href="/jj/prerelease/images/jj-logo.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.2.1"/><meta name="generator" content="Starlight v0.41.7"/><meta property="og:title" content="Repo-managed JJ configuration"/><meta property="og:type" content="article"/><meta property="og:url" content="https://senekor.github.io/jj/prerelease/design/managed-config/"/><meta property="og:locale" content="en"/><meta property="og:site_name" content="Jujutsu docs"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/jj/prerelease/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/jj/prerelease/_astro/common.BVVByPL0.css"><style>@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+@layer starlight.components{starlight-tabs:where(.astro-hbt4ddzs){display:block}.tablist-wrapper:where(.astro-hbt4ddzs){overflow-x:auto}:where(.astro-hbt4ddzs)[role=tablist]{border-bottom:2px solid var(--sl-color-gray-5);padding:0;list-style:none;display:flex}.tab:where(.astro-hbt4ddzs){display:flex}.tab:where(.astro-hbt4ddzs)>:where(.astro-hbt4ddzs)[role=tab]{--sl-tab-color-border:var(--sl-color-gray-5);line-height:var(--sl-line-height-headings);box-shadow:0 2px 0 var(--sl-tab-color-border);color:var(--sl-color-gray-3);outline-offset:var(--sl-outline-offset-inside);overflow-wrap:initial;align-items:center;gap:.5rem;padding:.275rem 1.25rem;text-decoration:none;display:flex}.tab:where(.astro-hbt4ddzs) :where(.astro-hbt4ddzs)[role=tab][aria-selected=true]{--sl-tab-color-border:var(--sl-color-text-accent);color:var(--sl-color-white);font-weight:600}.tablist-wrapper:where(.astro-hbt4ddzs)~[role=tabpanel]{margin-top:1rem}}
+</style><script type="module" src="/jj/prerelease/_astro/page.Dwipeu-R.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="page sl-flex astro-gqpr5s5a"><header class="header astro-gqpr5s5a"><div class="header astro-nczgtkxc"><div class="title-wrapper sl-flex astro-nczgtkxc"><a href="/jj/prerelease/" class="site-title sl-flex astro-clw6ags5"><img class="astro-clw6ags5" alt src="/jj/prerelease/_astro/jj-logo.CIiglsa3.svg" width="1024" height="1024"><span class="astro-clw6ags5" translate="no">Jujutsu docs</span></a></div><div class="sl-flex print:hidden astro-nczgtkxc"><site-search class="astro-nczgtkxc astro-r5ar4xm7" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-r5ar4xm7"><svg aria-hidden="true" class="astro-r5ar4xm7 astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-r5ar4xm7" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-r5ar4xm7" style="display: none;"><kbd class="astro-r5ar4xm7">Ctrl</kbd><kbd class="astro-r5ar4xm7">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-r5ar4xm7"><div class="dialog-frame sl-flex astro-r5ar4xm7"><button data-close-modal class="sl-flex md:sl-hidden astro-r5ar4xm7">Cancel</button><div class="search-container astro-r5ar4xm7"><div id="starlight__search" class="astro-r5ar4xm7"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/jj/prerelease/_astro/Search.astro_astro_type_script_index_0_lang.C4-OPG12.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-nczgtkxc"><div class="sl-flex social-icons astro-nczgtkxc"><a href="https://github.com/jj-vcs/jj" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">GitHub</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://discord.gg/dkmfj3aGQN" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">Discord</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.93-1.51 13.78 13.78 0 0 0-.64 1.28 18.27 18.27 0 0 0-5.5 0 12.64 12.64 0 0 0-.64-1.28h-.05A19.74 19.74 0 0 0 3.64 4.4 20.26 20.26 0 0 0 .11 18.09l.02.02a19.9 19.9 0 0 0 6.04 3.03l.04-.02a14.24 14.24 0 0 0 1.23-2.03.08.08 0 0 0-.05-.07 13.1 13.1 0 0 1-1.9-.92.08.08 0 0 1 .02-.1 10.2 10.2 0 0 0 .41-.31h.04a14.2 14.2 0 0 0 12.1 0l.04.01a9.63 9.63 0 0 0 .4.32.08.08 0 0 1-.03.1 12.29 12.29 0 0 1-1.9.91.08.08 0 0 0-.02.1 15.97 15.97 0 0 0 1.27 2.01h.04a19.84 19.84 0 0 0 6.03-3.05v-.03a20.12 20.12 0 0 0-3.57-13.69ZM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.96 2.42-2.16 2.42Zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.22 0 2.18 1.1 2.16 2.42 0 1.34-.94 2.42-2.16 2.42Z"/></svg></a></div><div class="version-switcher astro-g3bouzgm" id="version-switcher-container" style="display: none;"><label for="version-select" class="sl-hidden astro-g3bouzgm">Select documentation version</label><select id="version-select" class="version-select astro-g3bouzgm"><option class="astro-g3bouzgm">Loading versions...</option></select></div><script>(function(){const siteBase = "/jj/";
+
+    // Fetch versions client-side and populate the dropdown
+    async function loadVersions() {
+      const container = document.getElementById('version-switcher-container');
+      const select = document.getElementById('version-select');
+
+      if (!container || !select) return;
+
+      try {
+        const response = await fetch(`${siteBase}versions.json`);
+        if (!response.ok) {
+          // No versions.json available (e.g., in development)
+          return;
+        }
+
+        const versions = await response.json();
+        if (!versions || versions.length === 0) return;
+
+        // Determine current version from URL path
+        const pathMatch = window.location.pathname.slice(siteBase.length - 1).match(/^\/([^\/]+)/);
+        let currentVersion = 'unknown';
+
+        if (pathMatch) {
+          const pathVersion = pathMatch[1];
+          // Check if this is a direct version match
+          let versionObj = versions.find(v => v.version === pathVersion);
+          // Check if this matches an alias
+          if (!versionObj) {
+            versionObj = versions.find(v => v.aliases && v.aliases.includes(pathVersion));
+          }
+          currentVersion = versionObj?.version || pathVersion;
+        }
+
+        // Clear and populate the select
+        select.innerHTML = '';
+        versions.forEach(v => {
+          const option = document.createElement('option');
+          option.value = v.version;
+
+          // Display title with alias if it has one
+          const displayTitle = v.aliases && v.aliases.length > 0
+            ? `${v.title} (${v.aliases.join(', ')})`
+            : v.title;
+          option.textContent = displayTitle;
+
+          if (v.version === currentVersion) {
+            option.selected = true;
+          }
+
+          select.appendChild(option);
+        });
+
+        // Show the container
+        container.style.display = 'flex';
+
+        // Add change handler
+        select.addEventListener('change', (e) => {
+          const selectedVersion = e.target.value;
+          const currentPath = window.location.pathname.slice(siteBase.length - 1);
+          const versionRegex = /^\/[^\/]+/;
+          const pagePath = currentPath.replace(versionRegex, '').replace(/^\//, '');
+          window.location.href = `${siteBase}${selectedVersion}/${pagePath}`;
+        });
+      } catch (error) {
+        console.debug('Could not load versions.json:', error);
+      }
+    }
+
+    // Load versions when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadVersions);
+    } else {
+      loadVersions();
+    }
+  })();</script><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="dark" class="astro-r2p65idu">Dark</option><option value="light" class="astro-r2p65idu">Light</option><option value="auto" selected class="astro-r2p65idu">Auto</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-gqpr5s5a" aria-label="Main"><starlight-menu-button class="print:hidden astro-vvx7mffu"><button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-vvx7mffu"><svg aria-hidden="true" class="open-menu astro-vvx7mffu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-vvx7mffu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg></button></starlight-menu-button><script type="module">var e=class extends HTMLElement{btn=this.querySelector(`button`);constructor(){super(),this.btn.addEventListener(`click`,()=>this.toggleExpanded());let e=this.closest(`nav`);e&&e.addEventListener(`keyup`,e=>this.closeOnEscape(e)),matchMedia(`(min-width: 50em)`).addEventListener(`change`,()=>this.setExpanded(!1))}setExpanded(e){this.setAttribute(`aria-expanded`,String(e)),document.body.toggleAttribute(`data-mobile-menu-expanded`,e),document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}toggleExpanded(){this.setExpanded(this.getAttribute(`aria-expanded`)!==`true`)}closeOnEscape(e){e.code===`Escape`&&(this.setExpanded(!1),this.btn.focus())}};customElements.define(`starlight-menu-button`,e);</script><div id="starlight__sidebar" class="sidebar-pane astro-gqpr5s5a"><div class="sidebar-content sl-flex astro-gqpr5s5a"><sl-sidebar-state-persist data-hash="08gmgu0" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/" class="large astro-ojxuodky"><span class="astro-ojxuodky">Home</span></a></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Getting started</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/install-and-setup/" class="astro-ojxuodky"><span class="astro-ojxuodky">Installation and setup</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/tutorial/" class="astro-ojxuodky"><span class="astro-ojxuodky">Tutorial and bird&#39;s eye view</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/gerrit/" class="astro-ojxuodky"><span class="astro-ojxuodky">Working with Gerrit</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/github/" class="astro-ojxuodky"><span class="astro-ojxuodky">Working with GitHub</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/windows/" class="astro-ojxuodky"><span class="astro-ojxuodky">Working on Windows</span></a></li></ul></details></li><li class="astro-ojxuodky"><a href="/jj/prerelease/faq/" class="large astro-ojxuodky"><span class="astro-ojxuodky">FAQ</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/cli-reference/" class="large astro-ojxuodky"><span class="astro-ojxuodky">CLI reference</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/testimonials/" class="large astro-ojxuodky"><span class="astro-ojxuodky">Testimonials</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/community_tools/" class="large astro-ojxuodky"><span class="astro-ojxuodky">Community-built tools</span></a></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Concepts</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/working-copy/" class="astro-ojxuodky"><span class="astro-ojxuodky">Working copy</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/bookmarks/" class="astro-ojxuodky"><span class="astro-ojxuodky">Bookmarks</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/conflicts/" class="astro-ojxuodky"><span class="astro-ojxuodky">Conflicts</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/operation-log/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operation log</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/glossary/" class="astro-ojxuodky"><span class="astro-ojxuodky">Glossary</span></a></li></ul></details></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guides</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/guides/cli-revision-options/" class="astro-ojxuodky"><span class="astro-ojxuodky">CLI options for specifying revisions</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/guides/divergence/" class="astro-ojxuodky"><span class="astro-ojxuodky">Divergent changes</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/guides/multiple-remotes/" class="astro-ojxuodky"><span class="astro-ojxuodky">Multiple remotes</span></a></li></ul></details></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Reference</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/config/" class="astro-ojxuodky"><span class="astro-ojxuodky">Configuration</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/filesets/" class="astro-ojxuodky"><span class="astro-ojxuodky">Fileset language</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/revsets/" class="astro-ojxuodky"><span class="astro-ojxuodky">Revset language</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/templates/" class="astro-ojxuodky"><span class="astro-ojxuodky">Templating language</span></a></li></ul></details></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Comparisons</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/git-comparison/" class="astro-ojxuodky"><span class="astro-ojxuodky">Git comparison</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/git-command-table/" class="astro-ojxuodky"><span class="astro-ojxuodky">Git command table</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/git-compatibility/" class="astro-ojxuodky"><span class="astro-ojxuodky">Git compatibility</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/git-experts/" class="astro-ojxuodky"><span class="astro-ojxuodky">Jujutsu for Git experts</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/sapling-comparison/" class="astro-ojxuodky"><span class="astro-ojxuodky">Sapling comparison</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/related-work/" class="astro-ojxuodky"><span class="astro-ojxuodky">Other related work</span></a></li></ul></details></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Technical details</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/core_tenets/" class="astro-ojxuodky"><span class="astro-ojxuodky">Core tenets</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/technical/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/technical/concurrency/" class="astro-ojxuodky"><span class="astro-ojxuodky">Concurrency</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/technical/conflicts/" class="astro-ojxuodky"><span class="astro-ojxuodky">Conflicts</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/technical/revset-evaluation/" class="astro-ojxuodky"><span class="astro-ojxuodky">Revset evaluation</span></a></li></ul></details></li><li class="astro-ojxuodky"><details class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Contributing</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/contributing/" class="astro-ojxuodky"><span class="astro-ojxuodky">Guidelines and &quot;How to...?&quot;</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/code-of-conduct/" class="astro-ojxuodky"><span class="astro-ojxuodky">Code of conduct</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/style_guide/" class="astro-ojxuodky"><span class="astro-ojxuodky">Style guide</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design_docs/" class="astro-ojxuodky"><span class="astro-ojxuodky">Design docs</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design_doc_blueprint/" class="astro-ojxuodky"><span class="astro-ojxuodky">Design doc blueprint</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/releasing/" class="astro-ojxuodky"><span class="astro-ojxuodky">Releasing</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/governance/temporary-voting/" class="astro-ojxuodky"><span class="astro-ojxuodky">Temporary voting for governance</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/governance/governance/" class="astro-ojxuodky"><span class="astro-ojxuodky">Governance</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design docs</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/jj/prerelease/design/git-submodules/" class="astro-ojxuodky"><span class="astro-ojxuodky">git-submodules</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/git-submodule-storage/" class="astro-ojxuodky"><span class="astro-ojxuodky">git-submodule-storage</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/run/" class="astro-ojxuodky"><span class="astro-ojxuodky">JJ run</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/sparse-v2/" class="astro-ojxuodky"><span class="astro-ojxuodky">Sparse patterns v2</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/tracking-branches/" class="astro-ojxuodky"><span class="astro-ojxuodky">Tracking branches</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/copy-tracking/" class="astro-ojxuodky"><span class="astro-ojxuodky">Copy tracking and tracing</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/secure-config/" class="astro-ojxuodky"><span class="astro-ojxuodky">Secure config</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/managed-config/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">Managed config</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/design/jj-converge-command/" class="astro-ojxuodky"><span class="astro-ojxuodky">JJ converge (aka resolve-divergence)</span></a></li></ul></details></li><li class="astro-ojxuodky"><a href="/jj/prerelease/roadmap/" class="large astro-ojxuodky"><span class="astro-ojxuodky">Development roadmap</span></a></li><li class="astro-ojxuodky"><a href="/jj/prerelease/changelog/" class="large astro-ojxuodky"><span class="astro-ojxuodky">Changelog</span></a></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-b5gddk54"><div class="social-icons astro-b5gddk54"><a href="https://github.com/jj-vcs/jj" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">GitHub</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="https://discord.gg/dkmfj3aGQN" rel="me" class="sl-flex astro-cg55etiy"><span class="sr-only astro-cg55etiy">Discord</span><svg aria-hidden="true" class="astro-cg55etiy astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.93-1.51 13.78 13.78 0 0 0-.64 1.28 18.27 18.27 0 0 0-5.5 0 12.64 12.64 0 0 0-.64-1.28h-.05A19.74 19.74 0 0 0 3.64 4.4 20.26 20.26 0 0 0 .11 18.09l.02.02a19.9 19.9 0 0 0 6.04 3.03l.04-.02a14.24 14.24 0 0 0 1.23-2.03.08.08 0 0 0-.05-.07 13.1 13.1 0 0 1-1.9-.92.08.08 0 0 1 .02-.1 10.2 10.2 0 0 0 .41-.31h.04a14.2 14.2 0 0 0 12.1 0l.04.01a9.63 9.63 0 0 0 .4.32.08.08 0 0 1-.03.1 12.29 12.29 0 0 1-1.9.91.08.08 0 0 0-.02.1 15.97 15.97 0 0 0 1.27 2.01h.04a19.84 19.84 0 0 0 6.03-3.05v-.03a20.12 20.12 0 0 0-3.57-13.69ZM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.96 2.42-2.16 2.42Zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.22 0 2.18 1.1 2.16 2.42 0 1.34-.94 2.42-2.16 2.42Z"/></svg></a></div><div class="version-switcher astro-g3bouzgm" id="version-switcher-container" style="display: none;"><label for="version-select" class="sl-hidden astro-g3bouzgm">Select documentation version</label><select id="version-select" class="version-select astro-g3bouzgm"><option class="astro-g3bouzgm">Loading versions...</option></select></div><script>(function(){const siteBase = "/jj/";
+
+    // Fetch versions client-side and populate the dropdown
+    async function loadVersions() {
+      const container = document.getElementById('version-switcher-container');
+      const select = document.getElementById('version-select');
+
+      if (!container || !select) return;
+
+      try {
+        const response = await fetch(`${siteBase}versions.json`);
+        if (!response.ok) {
+          // No versions.json available (e.g., in development)
+          return;
+        }
+
+        const versions = await response.json();
+        if (!versions || versions.length === 0) return;
+
+        // Determine current version from URL path
+        const pathMatch = window.location.pathname.slice(siteBase.length - 1).match(/^\/([^\/]+)/);
+        let currentVersion = 'unknown';
+
+        if (pathMatch) {
+          const pathVersion = pathMatch[1];
+          // Check if this is a direct version match
+          let versionObj = versions.find(v => v.version === pathVersion);
+          // Check if this matches an alias
+          if (!versionObj) {
+            versionObj = versions.find(v => v.aliases && v.aliases.includes(pathVersion));
+          }
+          currentVersion = versionObj?.version || pathVersion;
+        }
+
+        // Clear and populate the select
+        select.innerHTML = '';
+        versions.forEach(v => {
+          const option = document.createElement('option');
+          option.value = v.version;
+
+          // Display title with alias if it has one
+          const displayTitle = v.aliases && v.aliases.length > 0
+            ? `${v.title} (${v.aliases.join(', ')})`
+            : v.title;
+          option.textContent = displayTitle;
+
+          if (v.version === currentVersion) {
+            option.selected = true;
+          }
+
+          select.appendChild(option);
+        });
+
+        // Show the container
+        container.style.display = 'flex';
+
+        // Add change handler
+        select.addEventListener('change', (e) => {
+          const selectedVersion = e.target.value;
+          const currentPath = window.location.pathname.slice(siteBase.length - 1);
+          const versionRegex = /^\/[^\/]+/;
+          const pagePath = currentPath.replace(versionRegex, '').replace(/^\//, '');
+          window.location.href = `${siteBase}${selectedVersion}/${pagePath}`;
+        });
+      } catch (error) {
+        console.debug('Could not load versions.json:', error);
+      }
+    }
+
+    // Load versions when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadVersions);
+    } else {
+      loadVersions();
+    }
+  })();</script><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-r2p65idu"><span class="sr-only astro-r2p65idu">Select theme</span><svg aria-hidden="true" class="icon label-icon astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-r2p65idu"><option value="dark" class="astro-r2p65idu">Dark</option><option value="light" class="astro-r2p65idu">Light</option><option value="auto" selected class="astro-r2p65idu">Auto</option></select><svg aria-hidden="true" class="icon caret astro-r2p65idu astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></div></nav><div class="main-frame astro-gqpr5s5a"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-abfeecmu"><aside class="right-sidebar-container print:hidden astro-abfeecmu"><div class="right-sidebar astro-abfeecmu"><div class="lg:sl-hidden astro-q5mffni3"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#overview" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#objective" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Objective</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#detailed-design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Detailed Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#security" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Security</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#where-to-read-from" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Where to read from</span></a></li></ul></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/jj/prerelease/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#overview" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#objective" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Objective</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#detailed-design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Detailed Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#security" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Security</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#where-to-read-from" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Where to read from</span></a></li></ul></li></ul></nav></starlight-toc><script type="module" src="/jj/prerelease/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-abfeecmu"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">Repo-managed JJ configuration</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><p>Author: <a href="mailto:msta@google.com">Matt Stark</a></p>
+<p>Status: Pending implementation</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Background”</span></a></div>
+<p>The design doc <a href="../secure-config/">Secure JJ Config</a> introduces a mechanism,
+<code dir="auto">metadata.binpb</code>, through which information about a repository / workspace can
+be stored. It also discusses how allowing an external user to have control over
+your config is a security risk.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="overview">Overview</h2><a class="sl-anchor-link" href="#overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Overview”</span></a></div>
+<p>There is a need for a repository to impose requirements upon users. Examples of
+these things include, but are not limited to:</p>
+<ul>
+<li>Formatter configuration (eg. <a href="https://source.chromium.org/chromium/chromium/src/+/main:tools/jj/config.toml;l=47-96;drc=080c978973f87ff2a1cfa514a13285baeaf3eedc">Chromium Formatter Config</a>)</li>
+<li>Pre-upload checks (eg. <a href="https://source.chromium.org/chromium/chromium/src/+/main:tools/jj/upload.py;drc=96f39fbbb720ca391d43cbb199a85af7d3309dd3">Chromium Pre-upload Checks</a>)</li>
+<li>Syncing scripts (eg. <a href="https://source.chromium.org/chromium/chromium/src/+/main:tools/jj/sync.py;drc=6ff08dcdd1fdeb1654a4d3da81d8adaeae4bbbf7">Chromium Syncing Scripts</a>)</li>
+<li>Custom aliases / revsets documented by some kind of “getting started with
+&#x3C;project>” document</li>
+</ul>
+<p>It should be fairly obvious that there is a strong benefit to doing so. However,
+controlling a user’s config is sufficient to get root access to their machine,
+so we require a mechanism more complex than just blindly loading the config
+file.</p>
+<p>This is currently achieved by projects such as chromium by instructing the user
+to symlink <code dir="auto">.jj/repo/config.toml</code> to a file in the repository. This has several
+drawbacks:</p>
+<ul>
+<li>It doesn’t work out-of-the-box. I need to manually symlink it</li>
+<li>It has no security guarantees. If I update the file in the repo, the user has no
+opportunity to review it.</li>
+<li>This prevents a user from having their own repo configuration on top of it.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="objective">Objective</h2><a class="sl-anchor-link" href="#objective"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Objective”</span></a></div>
+<ul>
+<li>Create a new layer of configuration between user configuration and repo
+configuration.</li>
+<li>This configuration will be stored in version control and henceforth be
+referred to as “managed” configuration.</li>
+<li>Implement it in a secure manner so that an attacker cannot take control over
+the managed config.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="detailed-design">Detailed Design</h2><a class="sl-anchor-link" href="#detailed-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Detailed Design”</span></a></div>
+<p>The managed configuration will be read from <code dir="auto">$REPO/.config/jj/config.toml</code>. This
+is intentionally designed to be very similar to <code dir="auto">$HOME/.config/jj/config.toml</code>
+for the user configuration.</p>
+<p>Any data stored here will be added to the <code dir="auto">metadata.binpb</code> that was created
+in <a href="../secure-config/">secure config</a> (that is, we will add additional fields to
+the <code dir="auto">Metadata</code> struct). This will ensure that we don’t suffer from the “zip file
+problem”.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="security">Security</h3><a class="sl-anchor-link" href="#security"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Security”</span></a></div>
+<div class="sl-heading-wrapper level-h4"><h4 id="trust-levels">Trust levels</h4><a class="sl-anchor-link" href="#trust-levels"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Trust levels”</span></a></div>
+<p>We will add the following fields to metadata:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/jj/prerelease/_astro/ec.w36nc.css"><script type="module" src="/jj/prerelease/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">enum TrustLevel {</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// There's no "optional" in protos. It just returns the zero value.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">UNSET = 0;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// The user wishes to completely ignore the managed config file.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">IGNORED = 1;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// In trusted mode, we directly read from the managed config file.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// This presents a security risk, so the user is expected to only do this</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// for a repo they trust.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">TRUSTED = 2;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// In notify mode, the user is expected to manually replicate any changes</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// they want from the managed config to the repo config.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">NOTIFY = 3;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// In review mode, the user has to review every config individually.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">REVIEW = 4;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">message Metadata {</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// previous fields</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// The trust level associated with this repo.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">TrustLevel trust_level = 2;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// When trust_level is review, the following fields are used.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">set&#x3C;Hash> approved_configs = 3;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">set&#x3C;Hash> rejected_configs = 4;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// This is a can of worms and thus out of scope of the MVP.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// There's no one correct way to choose the last approved.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// Sometimes, the user wants be the last appproved config in the workspace.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">// At other times, the user wants be the last appproved config in the repo.</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">string last_approved_config = 5;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="enum TrustLevel {    // There&#x27;s no &#x22;optional&#x22; in protos. It just returns the zero value.    UNSET = 0;    // The user wishes to completely ignore the managed config file.    IGNORED = 1;    // In trusted mode, we directly read from the managed config file.    // This presents a security risk, so the user is expected to only do this    // for a repo they trust.    TRUSTED = 2;    // In notify mode, the user is expected to manually replicate any changes    // they want from the managed config to the repo config.    NOTIFY = 3;    // In review mode, the user has to review every config individually.    REVIEW = 4;}message Metadata {    // previous fields    // The trust level associated with this repo.    TrustLevel trust_level = 2;    // When trust_level is review, the following fields are used.    set<Hash> approved_configs = 3;    set<Hash> rejected_configs = 4;    // This is a can of worms and thus out of scope of the MVP.    // There&#x27;s no one correct way to choose the last approved.    // Sometimes, the user wants be the last appproved config in the workspace.    // At other times, the user wants be the last appproved config in the repo.    string last_approved_config = 5;}"><div></div></button></div></figure></div>
+<p>Note that although the <code dir="auto">Metadata</code> struct is stored for both the repo and the
+workspace, this will only be used for the repository, not the workspace.</p>
+<p>This is because trust is associated with repositories, not workspaces. If I
+were to add an approved config in one workspace, for example, there is no
+reason I wouldn’t trust it in another.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="user-interface">User interface</h4><a class="sl-anchor-link" href="#user-interface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “User interface”</span></a></div>
+<p>Everything here only becomes relevant when a repo has a managed config. If it
+does not have a managed config, we skip everything here.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="unset-trust">Unset trust</h5><a class="sl-anchor-link" href="#unset-trust"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Unset trust”</span></a></div>
+<p>If a repository has a managed config and unset trust, we first use
+<code dir="auto">ui.can_prompt()</code> to determine whether we are in a TUI.</p>
+<ul>
+<li>If we are in a TUI, we ask the user what trust level they would like.</li>
+<li>If we are not in a TUI, we warn them that we are ignoring the repo config (we
+return <code dir="auto">IGNORE</code>), and that they can run <code dir="auto">jj config managed --ignore/notify/trust</code> in a terminal to configure this.</li>
+</ul>
+<div class="sl-heading-wrapper level-h5"><h5 id="ignored">Ignored</h5><a class="sl-anchor-link" href="#ignored"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Ignored”</span></a></div>
+<p>Nice and easy. We just completely ignore the managed config file.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="trusted">Trusted</h5><a class="sl-anchor-link" href="#trusted"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Trusted”</span></a></div>
+<p>Nice and easy. We just read the managed config file.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="notify">Notify</h5><a class="sl-anchor-link" href="#notify"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Notify”</span></a></div>
+<p>Roughly speaking, if <code dir="auto">mtime(repo_config_file) > mtime(managed_config)</code>, then
+the config is up to date.</p>
+<p>If it isn’t up to date, we print a warning. The user is then expected to update
+their repo config with any options they want from the managed config, which
+will stop the warning from printing as the mtime has changed.</p>
+<p>This notify option has a rather painful UX when it comes to keeping it in sync
+(particularly for a user who constantly switches between different branches
+synced to different versions), but I choose it for several reasons. The first is
+that the vast majority of users will simply select to blindly trust the repo.
+The only people who will choose this option are the very security conscious, and
+this is by far the most secure mechanism. Secondly, it is so much simpler than
+an approval based mechanism, as we don’t need to worry about things such as
+workspaces being synced to different places. It provides far fewer edge cases.</p>
+<p>In the future we may consider improving on the UX, doing things such as printing
+a diff since the last seen config (per <code dir="auto">last_approved_config</code>), but that isn’t
+a part of the MVP.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="review">Review</h5><a class="sl-anchor-link" href="#review"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Review”</span></a></div>
+<p>This is, by far, the most difficult option. There is no doubt that this
+provides value to some users, but the precise details of how this should behave
+is unclear (and much harder to implement than the other options).</p>
+<p>The biggest problem with this is that there is not a clear “correct” set of
+semantics. If a config is not approved / rejected, we have 3 options:</p>
+<ul>
+<li>Fail the command. This seems like a bad idea since users have an assumption
+that most jj commands will not fail.</li>
+<li>Use no config. This can potentially have quite bad effects on the repo.</li>
+<li>Use best-effort to use an approved config (probably most recently approved).</li>
+<li>Force the user to make a selection before running a command
+<ul>
+<li>This is impossible in general due to <code dir="auto">ui.can_prompt()</code> returning <code dir="auto">false</code>
+<ul>
+<li>We would need to fall back to another option if we can’t prompt.</li>
+</ul>
+</li>
+<li>But <code dir="auto">ui.can_prompt()</code> does not mean that we <em>should</em> prompt
+<ul>
+<li>E.g., a script that runs jj to do a bisection probably doesn’t want
+you to prompt every time the config changes.</li>
+<li>This probably isn’t too bad if it only happens once (e.g., setting trust
+level), but if it happens many times, it could be very annoying.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Consider the following examples</p>
+<div class="sl-heading-wrapper level-h6"><h6 id="user-is-working-on-config-file">User is working on config file.</h6><a class="sl-anchor-link" href="#user-is-working-on-config-file"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “User is working on config file.”</span></a></div>
+<ol>
+<li>User runs <code dir="auto">vim .config/jj/config.toml</code></li>
+<li>User tries to test out the config, but needs to manually approve their own
+local change to the config every single time (this can at least be
+mitigated via setting it to trust temporarily)</li>
+</ol>
+<div class="sl-heading-wrapper level-h6"><h6 id="disabling-config-messes-with-the-repo">Disabling config messes with the repo</h6><a class="sl-anchor-link" href="#disabling-config-messes-with-the-repo"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Disabling config messes with the repo”</span></a></div>
+<ol>
+<li>User approves a config.</li>
+<li>User runs <code dir="auto">jj git fetch</code>. There has been an update to the managed config.</li>
+<li>User runs <code dir="auto">jj rebase -b @ -o trunk()</code>. The managed config is now not
+approved, and thus the next jj command will have the config disabled.</li>
+</ol>
+<p>Depending on what has changed, a variety of things could happen:</p>
+<ul>
+<li>A user in a repo that defines <code dir="auto">trunk()</code> could run
+<code dir="auto">jj rebase -b &#x3C;revset> -o trunk()</code>
+<ul>
+<li>This would result in it going to the wrong trunk</li>
+</ul>
+</li>
+<li>A user in a repo that defines <code dir="auto">immutable_heads() = ...</code> could run something
+like <code dir="auto">jj rebase -b mutable() -o trunk()</code>
+<ul>
+<li>This would rebase a bunch of immutable commits</li>
+</ul>
+</li>
+<li>A user in a repo that defines <code dir="auto">pre-upload</code> hooks (which don’t yet exist,
+but are being planned) runs <code dir="auto">jj gerrit upload</code> and bypasses them entirely.</li>
+</ul>
+<p>Thanks to the magic of <code dir="auto">jj undo</code>, everything except the upload is recoverable.
+What makes them a problem, however, is the fact that a user would see the
+message “please approve / reject the config” and not suspect that the command
+has failed.</p>
+<div class="sl-heading-wrapper level-h6"><h6 id="best-effort-messes-with-the-user">Best-effort messes with the user</h6><a class="sl-anchor-link" href="#best-effort-messes-with-the-user"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Best-effort messes with the user”</span></a></div>
+<p>If we use best-effort instead, we are likely to run into a different set of
+issues.</p>
+<p>The first is that it’s no longer clear which config is being used. If I:</p>
+<ol>
+<li>Have two workspaces A and B with the same state, both approved.</li>
+<li>Sync workspace B and approve the config</li>
+<li>Check out an old version of workspace A</li>
+</ol>
+<p>Now which config is used?</p>
+<ul>
+<li>The most recently approved globally?</li>
+<li>The most recently approved for this workspace?</li>
+<li>Some algorithm which determines that the config for A was at a closer commit
+than B?</li>
+</ul>
+<p>The second issue is that things may be incorrect. If <code dir="auto">foo.py</code> was renamed to
+<code dir="auto">bar.py</code> and the reference was changed in <code dir="auto">config.toml</code>, for example, the
+config is going to break. This is not as large an issue as disabling config,
+IMO, as changes will usually result in an obvious error.</p>
+<div class="sl-heading-wrapper level-h6"><h6 id="conclusion">Conclusion</h6><a class="sl-anchor-link" href="#conclusion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Conclusion”</span></a></div>
+<p>The vast majority of users will not use this option, as very few users are
+security-conscious, working on a repo they don’t trust, and working on a repo
+with managed config.</p>
+<p>Due to:</p>
+<ul>
+<li>Significant implementation complexity
+<ul>
+<li>My prototype without this feature is only ~200 lines of code and ~100 lines
+of tests. This feature would likely double that for the most hacky simple
+implementation, and add significantly more if we wanted a proper nice UX.</li>
+</ul>
+</li>
+<li>The lack of a single “correct” solution</li>
+<li>The fact that most users just want the “trust” option</li>
+<li>The fact that it is no more difficult to add other options, then add the
+review option after the fact</li>
+<li>The time that would be required to get consensus on the various decisions
+that would need to be made in terms of how this would work.
+<ul>
+<li>There was already a lot of
+<a href="https://github.com/jj-vcs/jj/pull/7761#discussion_r2476135221">discussion</a>
+on this topic, but no clear conclusion was reached.</li>
+<li>Technical (e.g., disable vs. best-effort)</li>
+<li>UX
+<ul>
+<li>When reviewing, do we review diffs or full config files?</li>
+<li>Do we prompt the user to review before running the command?</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>I propose that the “review” option not be put in the MVP, and and instead be
+added in later.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="manually-changing">Manually changing</h5><a class="sl-anchor-link" href="#manually-changing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Manually changing”</span></a></div>
+<p>These options will also be able to be manually set via <code dir="auto">jj config managed --ignore/notify/trust</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="where-to-read-from">Where to read from</h3><a class="sl-anchor-link" href="#where-to-read-from"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Where to read from”</span></a></div>
+<p>This is the trickiest part of the proposal. Consider the following workflow:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">jj new main@origin</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">jj ...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">jj new stable-branch@origin</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="jj new main@originjj ...jj new stable-branch@origin"><div></div></button></div></figure></div>
+<p>There are some edge cases we need to consider:</p>
+<ul>
+<li><code dir="auto">stable-branch</code> may have existed before the config was added</li>
+<li><code dir="auto">stable-branch</code> may have a different copy of the managed config</li>
+</ul>
+<p>The naive assumption would be that you want to read the config from <code dir="auto">@</code>, as the
+config will always match the version of the code you’re using. However, it turns
+out that some things want to refer to <code dir="auto">@</code>, while others want to read the config
+from <code dir="auto">trunk()</code>.</p>
+<p>Consider several different use cases:</p>
+<ul>
+<li>My formatter was previously <code dir="auto">clang-format --foo</code>, but the option <code dir="auto">--foo</code> was
+deprecated in the latest version of <code dir="auto">clang-format</code></li>
+<li>Here, you want to read from <code dir="auto">trunk()</code></li>
+<li>My formatter was previously <code dir="auto">$repo/formatter --foo</code>, but the option <code dir="auto">--foo</code>
+was deprecated in the latest version of <code dir="auto">formatter</code></li>
+<li>Here, you want to read from <code dir="auto">@</code></li>
+<li>We decide to split long lines and add a new formatter (or pre-upload hook)
+config <code dir="auto">formatter --line-length=80</code></li>
+<li>Here, you probably want to read from <code dir="auto">@</code></li>
+<li>We decide to add a pre-upload check that validates that all commit
+descriptions contain a reference to a bug</li>
+<li>This should be applied to old branches as well, so you want <code dir="auto">trunk()</code></li>
+<li>We add a new helpful alias / revset</li>
+<li>This should be applied to old branches as well, so you want <code dir="auto">trunk()</code></li>
+<li>We move our formatter</li>
+<li>If it’s external, you want to read from <code dir="auto">trunk()</code></li>
+<li>If it’s internal, you want to read from <code dir="auto">@</code></li>
+</ul>
+<p>All in all, you can see a general pattern.</p>
+<ul>
+<li>If something refers to an in-repo tool, you <strong>probably</strong> want the config to
+be read from <code dir="auto">@</code></li>
+<li>Otherwise, you <strong>probably</strong> want to read from <code dir="auto">trunk()</code></li>
+<li>I say probably, because the split long lines example doesn’t conform to this
+rule.</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="problematic-examples">Problematic examples</h4><a class="sl-anchor-link" href="#problematic-examples"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Problematic examples”</span></a></div>
+<p>This is problematic with <code dir="auto">trunk()</code> because if you add the <code dir="auto">--reorder-hooks</code> and
+then checkout <code dir="auto">stable-branch</code> it will incorrectly attempt to reorder imports</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">[fix.tools.rustfmt]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">command = ["rustfmt", "--reorder-imports"]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="[fix.tools.rustfmt]command = [&#x22;rustfmt&#x22;, &#x22;--reorder-imports&#x22;]"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h5"><h5 id="solution-1-formatter-config">Solution 1: formatter config</h5><a class="sl-anchor-link" href="#solution-1-formatter-config"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Solution 1: formatter config”</span></a></div>
+<p>In practice, it is highly unlikely that a formatter config would be written that
+way. Far more likely, you would see an entry in <code dir="auto">config.toml</code> like:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">[fix.tools.rustfmt]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">command = ["rustfmt"]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="[fix.tools.rustfmt]command = [&#x22;rustfmt&#x22;]"><div></div></button></div></figure></div>
+<p><code dir="auto">.rustfmt.toml</code>:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">reorder_imports = true</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="reorder_imports = true"><div></div></button></div></figure></div>
+<p>This simply works out of the box, since the formatter is reading the config from
+<code dir="auto">@</code>’s <code dir="auto">.rustfmt.toml</code></p>
+<div class="sl-heading-wrapper level-h5"><h5 id="solution-2-more-general-but-convoluted-wrapper-script">Solution 2 (more general but convoluted): Wrapper script</h5><a class="sl-anchor-link" href="#solution-2-more-general-but-convoluted-wrapper-script"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Solution 2 (more general but convoluted): Wrapper script”</span></a></div>
+<p>As long as the formatter is in-repo, we can just write a wrapper script which
+does this for us.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">[fix.tools.rustfmt]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">command = ["rustfmt.py"]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="[fix.tools.rustfmt]command = [&#x22;rustfmt.py&#x22;]"><div></div></button></div></figure></div>
+<p><code dir="auto">rustfmt.py</code>:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">os.execv(["rustfmt", "--reorder-imports"])</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="os.execv([&#x22;rustfmt&#x22;, &#x22;--reorder-imports&#x22;])"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h4"><h4 id="solution-3-for-scripts-that-need-to-run-at-trunk">Solution 3 (for scripts that need to run at trunk)</h4><a class="sl-anchor-link" href="#solution-3-for-scripts-that-need-to-run-at-trunk"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Solution 3 (for scripts that need to run at trunk)”</span></a></div>
+<p>If you write a script for which the API keeps changing, eg. you add / remove
+flags to it, you can do something like this:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">[aliases]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">upload = ["util", "exec", "--", "bash", "-c", "python3", "-c", "$(jj file show -r 'trunk()' upload.py)"]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="[aliases]upload = [&#x22;util&#x22;, &#x22;exec&#x22;, &#x22;--&#x22;, &#x22;bash&#x22;, &#x22;-c&#x22;, &#x22;python3&#x22;, &#x22;-c&#x22;, &#x22;$(jj file show -r &#x27;trunk()&#x27; upload.py)&#x22;]"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h4"><h4 id="decision-trunk-vs-">Decision: Trunk vs @</h4><a class="sl-anchor-link" href="#decision-trunk-vs-"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Decision: Trunk vs @”</span></a></div>
+<p><code dir="auto">@</code> and <code dir="auto">trunk()</code> are the only two reasonable candidates as places to read from,
+IMO. I personally believe that if only one option is available, <code dir="auto">trunk()</code> would
+be much more appropriate, for the reasons specified above.</p>
+<p>However, @pmetzger has pointed out that in a future world where Git isn’t the
+backend, this decision may come back to bite us (as build tools may be checked
+in to the build).</p>
+<p>For now, we will only support reading from the working copy (<code dir="auto">@</code>), but in the
+future, we may consider supporting other revisions.</p>
+<p>To achieve this, there are several methods. I’ll list some of them, but they
+don’t need review, as they are out of scope of this proposal.</p>
+<p>The simplest that comes to mind is a <code dir="auto">--managed-config-from-revision</code> flag or
+config option.</p>
+<p>Alternatively, a more general approach could be to create some kind of include
+directive in <code dir="auto">config.toml</code> files, like so (this has already been discussed and
+rejected before, so it may not be viable).</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">includes = [</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">path = "other_config.toml",</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">revision = "trunk()",</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">},</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="includes = [    {        path = &#x22;other_config.toml&#x22;,        revision = &#x22;trunk()&#x22;,    },]"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h4"><h4 id="read-from-filesystem-or-from-repo-objects">Read from filesystem or from repo objects?</h4><a class="sl-anchor-link" href="#read-from-filesystem-or-from-repo-objects"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Read from filesystem or from repo objects?”</span></a></div>
+<p>The tradeoffs are:</p>
+<ul>
+<li>If we read it from the filesystem, then it will not be read if the path is
+not tracked, e.g. because you have done <code dir="auto">jj sparse --clear --add lib</code> or
+because the file matches .gitignore and is not yet tracked.
+<ul>
+<li>This could be mitigated by always including <code dir="auto">.config/jj</code> in <code dir="auto">jj sparse</code></li>
+</ul>
+</li>
+<li>If we read it from the repo objects, then changes will not apply to the next
+command unless we load this config after snapshotting</li>
+<li>Reading from the filesystem is faster</li>
+<li>mtime is only available when reading from the filesystem</li>
+</ul>
+<p>Reading from the filesystem seems strictly superior, given the mitigation
+strategy available, so we will go ahead with that for now. If we ever decide to
+support reading from <code dir="auto">trunk()</code>, however, we will need to support reading from
+the repo.</p></div><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="pagination-links print:hidden astro-jgq3vlii" dir="ltr"><a href="/jj/prerelease/design/secure-config/" rel="prev" class="astro-jgq3vlii"><svg aria-hidden="true" class="astro-jgq3vlii astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-jgq3vlii">Previous<br class="astro-jgq3vlii"><span class="link-title astro-jgq3vlii">Secure config</span></span></a><a href="/jj/prerelease/design/jj-converge-command/" rel="next" class="astro-jgq3vlii"><svg aria-hidden="true" class="astro-jgq3vlii astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-jgq3vlii">Next<br class="astro-jgq3vlii"><span class="link-title astro-jgq3vlii">JJ converge (aka resolve-divergence)</span></span></a></div></footer></div></div></main></div></div></div></div></body></html>
